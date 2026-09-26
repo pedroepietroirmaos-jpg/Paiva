@@ -1,0 +1,683 @@
+local Players=game:GetService("Players")
+local RunService=game:GetService("RunService")
+local Lighting=game:GetService("Lighting")
+local TweenService=game:GetService("TweenService")
+local UIS=game:GetService("UserInputService")
+
+local P=Players.LocalPlayer
+local G=P:WaitForChild("PlayerGui")
+local C=Color3.fromRGB
+local neon=C(0,200,255)
+local verde=C(0,255,120)
+local abaOff=C(28,42,60)
+
+local gui=Instance.new("ScreenGui",G)
+gui.Name="PaivaScripts"
+gui.IgnoreGuiInset=true
+gui.ResetOnSpawn=false
+gui.DisplayOrder=100
+
+local function txt(p,s,pos,t,col,font)
+	local x=Instance.new("TextLabel",p)
+	x.Size=s;x.Position=pos;x.BackgroundTransparency=1
+	x.Text=t;x.TextColor3=col or Color3.new(1,1,1)
+	x.Font=font or Enum.Font.Gotham;x.TextSize=20
+	return x
+end
+
+-- ==================================================
+-- 🎬 TELA DE CARREGAMENTO
+-- ==================================================
+local load=Instance.new("Frame",gui)
+load.Size=UDim2.fromScale(1,1)
+load.BackgroundColor3=C(5,8,18)
+load.BorderSizePixel=0
+
+local bgGrad=Instance.new("Frame",load)
+bgGrad.Size=UDim2.fromScale(1,1)
+bgGrad.BackgroundColor3=C(0,0,0)
+bgGrad.BorderSizePixel=0
+
+local grad=Instance.new("UIGradient",bgGrad)
+grad.Color=ColorSequence.new{
+	ColorSequenceKeypoint.new(0,C(5,8,20)),
+	ColorSequenceKeypoint.new(.5,C(20,15,50)),
+	ColorSequenceKeypoint.new(1,C(5,8,20))
+}
+grad.Rotation=45
+
+-- 🎯 Logo "P" (subi um pouco)
+local logoFrame=Instance.new("Frame",load)
+logoFrame.Size=UDim2.new(0,130,0,130)
+logoFrame.Position=UDim2.new(.5,-65,.20,-65)
+logoFrame.BackgroundColor3=C(15,25,45)
+logoFrame.BorderSizePixel=0
+Instance.new("UICorner",logoFrame).CornerRadius=UDim.new(0,22)
+
+local logoStroke=Instance.new("UIStroke",logoFrame)
+logoStroke.Color=neon
+logoStroke.Thickness=3
+logoStroke.Transparency=.1
+
+local logoLetra=txt(logoFrame,UDim2.new(1,0,1,0),UDim2.new(0,0,0,0),"P",neon,Enum.Font.GothamBlack)
+logoLetra.TextSize=68
+
+task.spawn(function()
+	while logoFrame and logoFrame.Parent do
+		TweenService:Create(logoStroke,TweenInfo.new(1),{Transparency=.6}):Play()
+		TweenService:Create(logoFrame,TweenInfo.new(1),{Size=UDim2.new(0,138,0,138),Position=UDim2.new(.5,-69,.20,-69)}):Play()
+		task.wait(1)
+		TweenService:Create(logoStroke,TweenInfo.new(1),{Transparency=.1}):Play()
+		TweenService:Create(logoFrame,TweenInfo.new(1),{Size=UDim2.new(0,130,0,130),Position=UDim2.new(.5,-65,.20,-65)}):Play()
+		task.wait(1)
+	end
+end)
+
+-- 🎯 Título "PAIVA SCRIPT" (bem separado da logo)
+local titulo=txt(load,UDim2.new(0,600,0,60),UDim2.new(.5,-300,.48,0),"PAIVA SCRIPT",Color3.new(1,1,1),Enum.Font.GothamBlack)
+titulo.TextSize=52
+
+local tituloGrad=Instance.new("UIGradient",titulo)
+tituloGrad.Color=ColorSequence.new{
+	ColorSequenceKeypoint.new(0,neon),
+	ColorSequenceKeypoint.new(.5,C(180,240,255)),
+	ColorSequenceKeypoint.new(1,neon)
+}
+
+-- 💬 Subtítulo (bem embaixo do título, com espaço)
+local subtitulo=txt(load,UDim2.new(0,600,0,30),UDim2.new(.5,-300,.58,0),"Inicializando...",C(180,200,220),Enum.Font.Gotham)
+subtitulo.TextSize=16
+
+local frases={
+	"Inicializando...",
+	"Carregando módulos...",
+	"Otimizando interface...",
+	"Preparando recursos...",
+	"Quase pronto...",
+	"Finalizando..."
+}
+
+task.spawn(function()
+	local i=1
+	while subtitulo and subtitulo.Parent do
+		subtitulo.Text=frases[i]
+		subtitulo.TextTransparency=1
+		TweenService:Create(subtitulo,TweenInfo.new(.3),{TextTransparency=0}):Play()
+		task.wait(1.2)
+		TweenService:Create(subtitulo,TweenInfo.new(.3),{TextTransparency=1}):Play()
+		task.wait(.3)
+		i=i+1
+		if i>#frases then i=1 end
+	end
+end)
+
+-- 📊 Porcentagem (bem separada, embaixo do subtítulo)
+local pc=txt(load,UDim2.new(0,300,0,50),UDim2.new(.5,-150,.68,0),"0%",neon,Enum.Font.GothamBlack)
+pc.TextSize=42
+
+-- 🌈 Barra (bem embaixo da porcentagem)
+local bb=Instance.new("Frame",load)
+bb.Size=UDim2.new(0,600,0,14)
+bb.Position=UDim2.new(.5,-300,.79,0)
+bb.BackgroundColor3=C(15,25,45)
+bb.BorderSizePixel=0
+Instance.new("UICorner",bb).CornerRadius=UDim.new(1,0)
+
+local bbStroke=Instance.new("UIStroke",bb)
+bbStroke.Color=C(40,60,90)
+bbStroke.Thickness=1
+bbStroke.Transparency=.5
+
+local bar=Instance.new("Frame",bb)
+bar.Size=UDim2.new(0,0,1,0)
+bar.BackgroundColor3=neon
+bar.BorderSizePixel=0
+Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)
+
+local barGrad=Instance.new("UIGradient",bar)
+barGrad.Color=ColorSequence.new{
+	ColorSequenceKeypoint.new(0,neon),
+	ColorSequenceKeypoint.new(.5,C(180,240,255)),
+	ColorSequenceKeypoint.new(1,neon)
+}
+
+for i=0,100 do
+	bar.Size=UDim2.new(i/100,0,1,0)
+	pc.Text=i.."%"
+	task.wait(.02)
+end
+
+task.wait(.3)
+
+-- 🎬 TELA FINAL "CRIADO POR" + "PAIVA SCRIPT"
+-- Esconde tudo
+titulo.Visible=false
+subtitulo.Visible=false
+pc.Visible=false
+bb.Visible=false
+logoFrame.Visible=false
+
+-- Créditos bem separados
+local cr=txt(load,UDim2.new(0,600,0,40),UDim2.new(.5,-300,.42,0),"CRIADO POR",C(200,220,240),Enum.Font.GothamBold)
+cr.TextSize=24
+
+local cn=txt(load,UDim2.new(0,600,0,70),UDim2.new(.5,-300,.50,0),"PAIVA SCRIPT",neon,Enum.Font.GothamBlack)
+cn.TextSize=56
+
+task.wait(2.5)
+
+TweenService:Create(cr,TweenInfo.new(.5),{TextTransparency=1}):Play()
+TweenService:Create(cn,TweenInfo.new(.5),{TextTransparency=1}):Play()
+task.wait(.6)
+
+load:Destroy()
+
+-- ==================================================
+-- 🎯 JANELA PRINCIPAL
+-- ==================================================
+local main=Instance.new("Frame",gui)
+main.Size=UDim2.new(0,500,0,350)
+main.Position=UDim2.new(.5,-250,.5,-175)
+main.BackgroundColor3=C(18,28,42)
+main.BorderSizePixel=0
+Instance.new("UICorner",main).CornerRadius=UDim.new(0,12)
+
+local stroke=Instance.new("UIStroke",main)
+stroke.Color=neon
+stroke.Thickness=1
+stroke.Transparency=.7
+
+local topbar=Instance.new("TextButton",main)
+topbar.Size=UDim2.new(1,0,0,55)
+topbar.Position=UDim2.new(0,0,0,0)
+topbar.BackgroundTransparency=1
+topbar.Text=""
+topbar.AutoButtonColor=false
+topbar.ZIndex=1
+
+local title=txt(main,UDim2.new(1,-145,0,45),UDim2.new(0,18,0,3),"PAIVA SCRIPT",Color3.new(1,1,1),Enum.Font.GothamBold)
+title.TextSize=20
+title.TextXAlignment=Enum.TextXAlignment.Left
+title.ZIndex=2
+
+-- ============ ARRASTAR ============
+local function makeDraggable(frame, handle, onClick)
+	local dragging=false
+	local dragStart
+	local startPos
+	local movedDist=0
+
+	handle.InputBegan:Connect(function(input)
+		if input.UserInputType==Enum.UserInputType.MouseButton1
+		or input.UserInputType==Enum.UserInputType.Touch then
+			dragging=true
+			movedDist=0
+			dragStart=input.Position
+			startPos=frame.Position
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(input)
+		if not dragging then return end
+		if input.UserInputType==Enum.UserInputType.MouseMovement
+		or input.UserInputType==Enum.UserInputType.Touch then
+			local d=input.Position-dragStart
+			movedDist=math.max(movedDist, math.abs(d.X)+math.abs(d.Y))
+			frame.Position=UDim2.new(
+				startPos.X.Scale,startPos.X.Offset+d.X,
+				startPos.Y.Scale,startPos.Y.Offset+d.Y
+			)
+		end
+	end)
+
+	UIS.InputEnded:Connect(function(input)
+		if input.UserInputType==Enum.UserInputType.MouseButton1
+		or input.UserInputType==Enum.UserInputType.Touch then
+			if dragging then
+				dragging=false
+				if movedDist<6 and onClick then
+					onClick()
+				end
+			end
+		end
+	end)
+end
+
+makeDraggable(main, topbar)
+
+-- ============ BOTÕES ============
+local function btn(p,s,pos,t,bg,hoverBg,isToggle)
+	local b=Instance.new("TextButton",p)
+	b.Size=s;b.Position=pos;b.Text=t
+	b.BackgroundColor3=bg or C(28,42,60)
+	b.TextColor3=Color3.new(1,1,1)
+	b.Font=Enum.Font.GothamBold;b.TextSize=12
+	b.AutoButtonColor=false
+	Instance.new("UICorner",b).CornerRadius=UDim.new(0,7)
+
+	local bs=Instance.new("UIStroke",b)
+	bs.Color=C(60,80,110)
+	bs.Thickness=1
+	bs.Transparency=.6
+
+	local baseBg=b.BackgroundColor3
+	local hBg=hoverBg or C(40,60,85)
+
+	if not isToggle then
+		b.MouseEnter:Connect(function()
+			TweenService:Create(b,TweenInfo.new(.15),{BackgroundColor3=hBg}):Play()
+			TweenService:Create(bs,TweenInfo.new(.15),{Color=neon,Transparency=.2}):Play()
+		end)
+		b.MouseLeave:Connect(function()
+			TweenService:Create(b,TweenInfo.new(.15),{BackgroundColor3=baseBg}):Play()
+			TweenService:Create(bs,TweenInfo.new(.15),{Color=C(60,80,110),Transparency=.6}):Play()
+		end)
+	else
+		b.MouseEnter:Connect(function()
+			TweenService:Create(bs,TweenInfo.new(.15),{Color=neon,Transparency=.2}):Play()
+		end)
+		b.MouseLeave:Connect(function()
+			TweenService:Create(bs,TweenInfo.new(.15),{Color=C(60,80,110),Transparency=.6}):Play()
+		end)
+	end
+
+	b.MouseButton1Down:Connect(function()
+		TweenService:Create(b,TweenInfo.new(.08),{Size=UDim2.new(s.X.Scale,s.X.Offset-2,s.Y.Scale,s.Y.Offset-2)}):Play()
+	end)
+	b.MouseButton1Up:Connect(function()
+		TweenService:Create(b,TweenInfo.new(.1),{Size=s}):Play()
+	end)
+
+	return b
+end
+
+local close=btn(main,UDim2.new(0,38,0,38),UDim2.new(1,-48,0,7),"×",C(35,45,65),C(220,60,80))
+close.TextSize=22
+close.ZIndex=3
+
+local min=btn(main,UDim2.new(0,38,0,38),UDim2.new(1,-91,0,7),"−",C(35,45,65),C(70,150,220))
+min.TextSize=22
+min.ZIndex=3
+
+local side=Instance.new("Frame",main)
+side.Size=UDim2.new(0,125,1,-55)
+side.Position=UDim2.new(0,0,0,55)
+side.BackgroundColor3=C(14,22,34)
+side.BorderSizePixel=0
+side.ZIndex=2
+
+local function abaBtn(parent,pos,texto)
+	local b=Instance.new("TextButton",parent)
+	b.Size=UDim2.new(1,-14,0,40)
+	b.Position=pos
+	b.Text=texto
+	b.BackgroundColor3=abaOff
+	b.TextColor3=Color3.new(1,1,1)
+	b.Font=Enum.Font.GothamBold
+	b.TextSize=12
+	b.AutoButtonColor=false
+	b.ZIndex=3
+	Instance.new("UICorner",b).CornerRadius=UDim.new(0,7)
+
+	local bs=Instance.new("UIStroke",b)
+	bs.Color=C(60,80,110)
+	bs.Thickness=1
+	bs.Transparency=.6
+
+	b.MouseEnter:Connect(function()
+		TweenService:Create(bs,TweenInfo.new(.15),{Color=neon,Transparency=.2}):Play()
+	end)
+	b.MouseLeave:Connect(function()
+		TweenService:Create(bs,TweenInfo.new(.15),{Color=C(60,80,110),Transparency=.6}):Play()
+	end)
+
+	return b
+end
+
+local db=abaBtn(side,UDim2.new(0,7,0,12),"⚡ DESEMPENHO")
+local fb=abaBtn(side,UDim2.new(0,7,0,60),"🔤 FONTE")
+
+db.BackgroundColor3=neon
+
+local df=Instance.new("Frame",main)
+df.Size=UDim2.new(1,-140,1,-65)
+df.Position=UDim2.new(0,135,0,55)
+df.BackgroundTransparency=1
+df.ZIndex=2
+
+local ff=df:Clone()
+ff.Parent=main
+ff.Visible=false
+
+local function option(icon,name,desc,y)
+	local c=Instance.new("Frame",df)
+	c.Size=UDim2.new(1,-10,0,62)
+	c.Position=UDim2.new(0,5,0,y)
+	c.BackgroundColor3=C(28,42,60)
+	c.BorderSizePixel=0
+	c.ZIndex=2
+	Instance.new("UICorner",c).CornerRadius=UDim.new(0,8)
+
+	local cs=Instance.new("UIStroke",c)
+	cs.Color=C(45,65,90)
+	cs.Thickness=1
+	cs.Transparency=.5
+
+	c.MouseEnter:Connect(function()
+		TweenService:Create(cs,TweenInfo.new(.15),{Color=neon,Transparency=.2}):Play()
+	end)
+	c.MouseLeave:Connect(function()
+		TweenService:Create(cs,TweenInfo.new(.15),{Color=C(45,65,90),Transparency=.5}):Play()
+	end)
+
+	local ic=txt(c,UDim2.new(0,30,0,30),UDim2.new(0,8,.5,-15),icon)
+	ic.TextSize=18
+	ic.TextXAlignment=Enum.TextXAlignment.Center
+	ic.ZIndex=3
+
+	local n=txt(c,UDim2.new(1,-110,0,25),UDim2.new(0,42,0,5),name)
+	n.Font=Enum.Font.GothamBold;n.TextSize=14
+	n.TextXAlignment=Enum.TextXAlignment.Left
+	n.ZIndex=3
+
+	local d=txt(c,UDim2.new(1,-100,0,20),UDim2.new(0,42,0,30),desc,C(170,195,215))
+	d.TextSize=10;d.TextXAlignment=Enum.TextXAlignment.Left
+	d.ZIndex=3
+
+	local b=btn(c,UDim2.new(0,48,0,25),UDim2.new(1,-60,.5,-12),"",C(55,70,90),C(70,85,110),true)
+	b.ZIndex=3
+	local q=Instance.new("Frame",b)
+	q.Size=UDim2.new(0,19,0,19)
+	q.Position=UDim2.new(0,3,.5,-9)
+	q.BackgroundColor3=Color3.new(1,1,1)
+	q.ZIndex=4
+	Instance.new("UICorner",q).CornerRadius=UDim.new(1,0)
+
+	return b,q
+end
+
+local ft,fc=option("🎯","Mostrar FPS","Exibe os quadros por segundo",0)
+local at,ac=option("⚡","Anti Lag","Visual simples estilo massinha",70)
+local mt,mc=option("🎬","Remover Animações","Desativa as animações",140)
+local kt,kc=option("💤","Anti AFK","Evita kick por inatividade",210)
+
+local function toggle(b,c,on)
+	if on then
+		b.BackgroundColor3=neon
+		TweenService:Create(c,TweenInfo.new(.2),{
+			Position=UDim2.new(1,-22,.5,-9)
+		}):Play()
+	else
+		b.BackgroundColor3=C(55,70,90)
+		TweenService:Create(c,TweenInfo.new(.2),{
+			Position=UDim2.new(0,3,.5,-9)
+		}):Play()
+	end
+end
+
+-- ============ FPS ============
+local fps=false
+local frames,last=0,tick()
+
+local fl=txt(gui,UDim2.new(0,100,0,30),UDim2.new(1,-110,0,8),"FPS: 0")
+fl.BackgroundColor3=C(14,22,34)
+fl.BackgroundTransparency=0
+fl.Font=Enum.Font.GothamBold
+fl.TextSize=13
+fl.Visible=false
+Instance.new("UICorner",fl).CornerRadius=UDim.new(0,7)
+local fls=Instance.new("UIStroke",fl)
+fls.Color=neon
+fls.Thickness=1
+fls.Transparency=.4
+
+RunService.RenderStepped:Connect(function()
+	frames+=1
+	if tick()-last>=1 then
+		fl.Text="FPS: "..frames
+		frames=0
+		last=tick()
+	end
+end)
+
+ft.Activated:Connect(function()
+	fps=not fps
+	toggle(ft,fc,fps)
+	fl.Visible=fps
+end)
+
+-- ============ ANTI LAG ============
+local function anti()
+	Lighting.GlobalShadows=false
+	for _,o in ipairs(workspace:GetDescendants()) do
+		if o:IsA("BasePart") then
+			local n=o.Name:lower()
+			local s=o.Size
+			local col=o.Color
+
+			if n:find("water") or n:find("agua") then
+				col=C(45,150,220)
+			elseif n:find("road") or n:find("caminho") or n:find("estrada") or n:find("sand") or n:find("areia") then
+				col=C(205,175,105)
+			elseif n:find("wall") or n:find("parede") or n:find("muro") or n:find("mountain") or n:find("montanha") then
+				col=C(175,125,75)
+			elseif n:find("tree") or n:find("arvore") or n:find("plant") or n:find("planta") or n:find("bush") or n:find("leaf") then
+				col=C(60,175,70)
+			elseif s.Y<s.X*.35 and s.Y<s.Z*.35 then
+				col=C(75,180,60)
+			elseif s.Y>s.X*2 or s.Y>s.Z*2 then
+				col=C(175,125,75)
+			end
+
+			pcall(function()
+				o.Material=Enum.Material.SmoothPlastic
+				o.CastShadow=false
+				o.Reflectance=0
+				o.Color=col
+			end)
+		elseif o:IsA("ParticleEmitter") or o:IsA("Trail") or o:IsA("Beam")
+		or o:IsA("Smoke") or o:IsA("Fire") or o:IsA("Sparkles") then
+			pcall(function() o.Enabled=false end)
+		end
+	end
+end
+
+local antiOn=false
+
+at.Activated:Connect(function()
+	antiOn=not antiOn
+	toggle(at,ac,antiOn)
+	if antiOn then task.spawn(anti) end
+end)
+
+-- ============ ANIMAÇÕES ============
+local animOn=false
+
+local function anim(c)
+	local h=c:FindFirstChildOfClass("Humanoid")
+	if not h then return end
+	local a=c:FindFirstChild("Animate")
+	if a then a.Disabled=true end
+	local an=h:FindFirstChildOfClass("Animator")
+	if an then
+		for _,t in ipairs(an:GetPlayingAnimationTracks()) do
+			t:Stop()
+		end
+	end
+end
+
+mt.Activated:Connect(function()
+	animOn=not animOn
+	toggle(mt,mc,animOn)
+	if animOn and P.Character then anim(P.Character) end
+end)
+
+P.CharacterAdded:Connect(function(c)
+	if animOn then task.wait(.5);anim(c) end
+end)
+
+-- ============ ANTI AFK SEGURO ============
+local antiAfkOn=false
+
+local function loopAntiAfk()
+	task.spawn(function()
+		while antiAfkOn do
+			for _=1,240 do
+				if not antiAfkOn then return end
+				task.wait(1)
+			end
+			if not antiAfkOn then return end
+			local char=P.Character
+			local hum=char and char:FindFirstChildOfClass("Humanoid")
+			if hum and hum.Health>0 then
+				pcall(function() hum.Jump=true end)
+			end
+		end
+	end)
+end
+
+kt.Activated:Connect(function()
+	antiAfkOn=not antiAfkOn
+	toggle(kt,kc,antiAfkOn)
+	if antiAfkOn then
+		loopAntiAfk()
+		print("[PaivaScript] Anti AFK ATIVADO")
+	else
+		print("[PaivaScript] Anti AFK DESATIVADO")
+	end
+end)
+
+-- ============ FONTE ============
+local ftit=txt(ff,UDim2.new(1,-10,0,30),UDim2.new(0,5,0,0),"Escolha a fonte")
+ftit.Font=Enum.Font.GothamBold
+ftit.TextSize=15
+ftit.TextXAlignment=Enum.TextXAlignment.Left
+
+local choose=btn(ff,UDim2.new(1,-10,0,42),UDim2.new(0,5,0,35),"Fonte: Gotham  ▼",C(28,42,60))
+choose.TextXAlignment=Enum.TextXAlignment.Left
+
+local list=Instance.new("ScrollingFrame",ff)
+list.Size=UDim2.new(1,-10,0,130)
+list.Position=UDim2.new(0,5,0,85)
+list.BackgroundColor3=C(20,32,48)
+list.BorderSizePixel=0
+list.ScrollBarThickness=4
+list.CanvasSize=UDim2.new(0,0,0,300)
+list.Visible=false
+Instance.new("UICorner",list).CornerRadius=UDim.new(0,8)
+
+local current=Enum.Font.Gotham
+
+local function font(f,n)
+	current=f
+	for _,o in ipairs(G:GetDescendants()) do
+		if o:IsA("TextLabel") or o:IsA("TextButton") or o:IsA("TextBox") then
+			pcall(function() o.Font=f end)
+		end
+	end
+	choose.Text="Fonte: "..n.."  ▼"
+	list.Visible=false
+end
+
+local fonts={
+	{"Gotham",Enum.Font.Gotham},
+	{"SourceSans",Enum.Font.SourceSans},
+	{"Arcade",Enum.Font.Arcade},
+	{"Cartoon",Enum.Font.Cartoon},
+	{"SciFi",Enum.Font.SciFi},
+	{"Fantasy",Enum.Font.Fantasy},
+	{"Code",Enum.Font.Code}
+}
+
+for i,v in ipairs(fonts) do
+	local b=btn(list,UDim2.new(1,-8,0,35),UDim2.new(0,4,0,(i-1)*41+4),v[1],C(28,42,60))
+	b.Font=v[2]
+	b.Activated:Connect(function()
+		font(v[2],v[1])
+	end)
+end
+
+choose.Activated:Connect(function()
+	list.Visible=not list.Visible
+end)
+
+local function setTab(aba)
+	if aba=="desempenho" then
+		db.BackgroundColor3=neon
+		fb.BackgroundColor3=abaOff
+	else
+		db.BackgroundColor3=abaOff
+		fb.BackgroundColor3=neon
+	end
+end
+
+db.Activated:Connect(function()
+	df.Visible=true
+	ff.Visible=false
+	setTab("desempenho")
+end)
+
+fb.Activated:Connect(function()
+	df.Visible=false
+	ff.Visible=true
+	setTab("fonte")
+end)
+
+-- ============ BOTÃO "P" ============
+local mini=Instance.new("TextButton",gui)
+mini.Size=UDim2.new(0,60,0,60)
+mini.Position=UDim2.new(0,18,.5,-30)
+mini.Text=""
+mini.BackgroundColor3=C(18,28,42)
+mini.AutoButtonColor=false
+mini.Visible=false
+mini.ZIndex=100
+Instance.new("UICorner",mini).CornerRadius=UDim.new(1,0)
+
+local miniStroke=Instance.new("UIStroke",mini)
+miniStroke.Color=neon
+miniStroke.Thickness=2
+miniStroke.Transparency=.2
+
+local miniTxt=Instance.new("TextLabel",mini)
+miniTxt.Size=UDim2.new(1,0,1,0)
+miniTxt.Position=UDim2.new(0,0,0,0)
+miniTxt.BackgroundTransparency=1
+miniTxt.Text="P"
+miniTxt.TextColor3=neon
+miniTxt.Font=Enum.Font.GothamBlack
+miniTxt.TextSize=30
+miniTxt.ZIndex=101
+
+mini.MouseEnter:Connect(function()
+	TweenService:Create(mini,TweenInfo.new(.2),{BackgroundColor3=C(25,40,60)}):Play()
+	TweenService:Create(miniTxt,TweenInfo.new(.2),{TextSize=34}):Play()
+end)
+mini.MouseLeave:Connect(function()
+	TweenService:Create(mini,TweenInfo.new(.2),{BackgroundColor3=C(18,28,42)}):Play()
+	TweenService:Create(miniTxt,TweenInfo.new(.2),{TextSize=30}):Play()
+end)
+
+makeDraggable(mini, mini, function()
+	main.Visible=true
+	mini.Visible=false
+end)
+
+min.Activated:Connect(function()
+	main.Visible=false
+	mini.Visible=true
+end)
+
+close.Activated:Connect(function()
+	gui:Destroy()
+end)
+
+G.DescendantAdded:Connect(function(o)
+	if o:IsA("TextLabel") or o:IsA("TextButton") or o:IsA("TextBox") then
+		if not o:IsDescendantOf(gui) then
+			pcall(function() o.Font=current end)
+		end
+	end
+end)
+
+print("[PaivaScript] Carregado com sucesso!")
